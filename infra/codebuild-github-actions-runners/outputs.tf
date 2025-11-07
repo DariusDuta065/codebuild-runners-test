@@ -14,8 +14,8 @@ output "github_pat_secret_arn" {
 }
 
 output "security_group_id" {
-  description = "Security group ID for CodeBuild"
-  value       = aws_security_group.codebuild.id
+  description = "Security group ID for CodeBuild (empty if VPC is disabled)"
+  value       = var.vpc_id != "" ? aws_security_group.codebuild[0].id : null
 }
 
 output "setup_instructions" {
@@ -46,7 +46,7 @@ output "setup_instructions" {
 
 3. CodeBuild Project Name: ${aws_codebuild_project.github_runner.name}
 4. CodeBuild Project ARN: ${aws_codebuild_project.github_runner.arn}
-5. Security Group ID: ${aws_security_group.codebuild.id}
+5. Security Group ID: ${var.vpc_id != "" ? aws_security_group.codebuild[0].id : "N/A (VPC disabled)"}
 EOF
 }
 

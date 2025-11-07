@@ -72,6 +72,7 @@ resource "aws_iam_policy" "codebuild" {
           "ec2:DescribeVpcs",
           "ec2:DescribeSubnets",
           "ec2:DescribeSecurityGroups",
+          "ec2:DescribeDhcpOptions",
           "ec2:CreateNetworkInterface",
           "ec2:DeleteNetworkInterface",
           "ec2:DescribeNetworkInterfaces"
@@ -81,11 +82,32 @@ resource "aws_iam_policy" "codebuild" {
       {
         Effect = "Allow"
         Action = [
+          "ec2:CreateNetworkInterfacePermission"
+        ]
+        Resource = "arn:aws:ec2:${var.aws_region}:*:network-interface/*"
+        Condition = {
+          StringLike = {
+            "ec2:Subnet" = [
+              "arn:aws:ec2:${var.aws_region}:*:subnet/*"
+            ]
+            "ec2:AuthorizedService" = "codebuild.amazonaws.com"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents"
         ]
-        Resource = "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${var.project_name}*"
+        Resource = [
+          "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${var.project_name}*",
+          "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${var.project_name}*:*"
+        ]
       }
     ]
   })
@@ -98,29 +120,61 @@ resource "aws_iam_role_policy_attachment" "codebuild" {
   policy_arn = aws_iam_policy.codebuild.arn
 }
 
-# VPC Configuration
+# VPC Configuration (only if vpc_id is provided)
 data "aws_vpc" "main" {
-  id = var.vpc_id
+  count = var.vpc_id != "" ? 1 : 0
+  id    = var.vpc_id
 }
 
 data "aws_subnets" "main" {
+  count = var.vpc_id != "" ? 1 : 0
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [data.aws_vpc.main[0].id]
   }
 }
 
-# Security Group for CodeBuild
+# Security Group for CodeBuild (only if vpc_id is provided)
 resource "aws_security_group" "codebuild" {
+  count       = var.vpc_id != "" ? 1 : 0
   name        = "${var.project_name}-sg"
   description = "Security group for CodeBuild GitHub Actions runners"
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = data.aws_vpc.main[0].id
 
+  # Allow all IPv4 ingress
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all IPv4 ingress"
+  }
+
+  # Allow all IPv6 ingress
+  ingress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow all IPv6 ingress"
+  }
+
+  # Allow all IPv4 egress
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all IPv4 egress"
+  }
+
+  # Allow all IPv6 egress
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow all IPv6 egress"
   }
 
   tags = merge(var.tags, {
@@ -163,10 +217,13 @@ resource "aws_codebuild_project" "github_runner" {
     }
   }
 
-  vpc_config {
-    vpc_id             = data.aws_vpc.main.id
-    subnets            = data.aws_subnets.main.ids
-    security_group_ids = [aws_security_group.codebuild.id]
+  dynamic "vpc_config" {
+    for_each = var.vpc_id != "" ? [1] : []
+    content {
+      vpc_id             = data.aws_vpc.main[0].id
+      subnets            = data.aws_subnets.main[0].ids
+      security_group_ids = [aws_security_group.codebuild[0].id]
+    }
   }
 
   logs_config {

@@ -42,12 +42,12 @@ variable "project_name" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID for CodeBuild"
+  description = "VPC ID for CodeBuild (leave empty to disable VPC)"
   type        = string
-  default     = "vpc-18bb4761"
+  default     = ""
   validation {
-    condition     = length(var.vpc_id) > 0
-    error_message = "VPC ID cannot be empty."
+    condition     = var.vpc_id == "" || can(regex("^vpc-", var.vpc_id))
+    error_message = "VPC ID must be empty or start with 'vpc-'."
   }
 }
 
