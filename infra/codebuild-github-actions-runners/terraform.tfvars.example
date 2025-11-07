@@ -1,0 +1,26 @@
+# Copy this file to terraform.tfvars and customize the values
+
+# Your GitHub username or organization name (REQUIRED)
+# This is used to configure the CodeBuild project source
+github_username = "your-github-username"
+
+# AWS region (optional, defaults to eu-west-1)
+aws_region = "eu-west-1"
+
+# CodeBuild project name (optional, defaults to github-runner)
+project_name = "github-runner"
+
+# VPC ID for CodeBuild (optional, defaults to vpc-18bb4761)
+vpc_id = "vpc-18bb4761"
+
+# Build timeout in minutes (optional, defaults to 60)
+build_timeout = 60
+
+# Tags for resources
+tags = {
+  Project     = "codebuild-github-runners"
+  ManagedBy   = "terraform"
+  Environment = "production"
+  Owner       = "your-team"
+}
+
