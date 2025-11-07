@@ -12,8 +12,15 @@ permissions:
 
 jobs:
   test:
-    runs-on: codebuild-github-runner-${{ github.run_id }}-${{ github.run_attempt }}
+    runs-on:
+      - codebuild-github-runner-${{ github.run_id }}-${{ github.run_attempt }}
+        image:${{ matrix.image }}
+        instance-size:${{ matrix.instance-size }}
     environment: aws
+    strategy:
+      matrix:
+        image: [arm-3.0, linux-5.0]
+        instance-size: [small, medium]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
