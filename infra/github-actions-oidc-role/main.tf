@@ -7,12 +7,27 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "terraform-state-590624982938"
+    key          = "github-actions-oidc-role/terraform.tfstate"
+    region       = "eu-west-1"
+    use_lockfile = true
+  }
 }
 
 # Configure the AWS Provider
 provider "aws" {
   region  = var.aws_region
   profile = "default"
+
+  default_tags {
+    tags = {
+      Project     = "github-actions-oidc"
+      ManagedBy   = "terraform"
+      Environment = "production"
+    }
+  }
 }
 
 # Get GitHub's OIDC certificate thumbprint
@@ -25,7 +40,6 @@ resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.github.certificates[0].sha1_fingerprint]
-  tags            = var.tags
 }
 
 # Create IAM role for GitHub Actions
@@ -58,7 +72,6 @@ resource "aws_iam_role" "github_actions" {
   })
 
   description          = var.role_description
-  tags                 = var.tags
   max_session_duration = var.max_session_duration
 }
 

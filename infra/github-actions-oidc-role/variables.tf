@@ -55,13 +55,3 @@ variable "attached_policy_arns" {
     # "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
   ]
 }
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default = {
-    Project     = "github-actions-oidc"
-    ManagedBy   = "terraform"
-    Environment = "production"
-  }
-}
