@@ -9,9 +9,3 @@ variable "repository_name" {
   type        = string
   default     = "200mb-image"
 }
-
-variable "tags" {
-  description = "Tags to apply to resources"
-  type        = map(string)
-  default     = {}
-}

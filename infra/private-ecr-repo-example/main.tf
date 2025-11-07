@@ -6,11 +6,26 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "terraform-state-590624982938"
+    key          = "private-ecr-repo-example/terraform.tfstate"
+    region       = "eu-west-1"
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
   region  = var.aws_region
   profile = "default"
+
+  default_tags {
+    tags = {
+      Project     = "private-ecr-repo-example"
+      ManagedBy   = "terraform"
+      Environment = "production"
+    }
+  }
 }
 
 # Private ECR Repository
@@ -25,8 +40,6 @@ resource "aws_ecr_repository" "private_repo" {
   encryption_configuration {
     encryption_type = "AES256"
   }
-
-  tags = var.tags
 }
 
 # Lifecycle policy to keep only the latest image (optional, for cost savings)
