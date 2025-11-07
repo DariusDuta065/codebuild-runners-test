@@ -97,6 +97,20 @@ resource "aws_iam_policy" "ecr_full_access" {
           "ecr:*",
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr-public:*",
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sts:GetServiceBearerToken",
+        ]
+        Resource = "*"
       }
     ]
   })
