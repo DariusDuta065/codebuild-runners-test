@@ -13,13 +13,21 @@ permissions:
 jobs:
   test:
     runs-on: codebuild-github-runner-${{ github.run_id }}-${{ github.run_attempt }}
+    environment: aws
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::590624982938:role/github-actions-oidc-role
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.OIDC_IAM_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Run AWS S3 command
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull nginx ECR public image
         run: |
-          aws s3 ls | wc -l
+          docker pull public.ecr.aws/nginx/nginx:latest
+
+      - name: Pull private ECR image
+        run: |
+          docker pull ${{ vars.ECR_REPO_URL }}/200mb-image:latest
