@@ -9,8 +9,8 @@ output "codebuild_project_arn" {
 }
 
 output "github_pat_secret_arn" {
-  description = "ARN of the Secrets Manager secret for GitHub PAT"
-  value       = aws_secretsmanager_secret.github_pat.arn
+  description = "ARN of the Secrets Manager secret for GitHub PAT (passed as input variable)"
+  value       = var.github_pat_secret_arn
 }
 
 output "security_group_id" {
@@ -19,13 +19,12 @@ output "security_group_id" {
 }
 
 output "setup_instructions" {
-  description = "Instructions for updating GitHub PAT and using the runner"
+  description = "Instructions for using the runner"
   value       = <<-EOF
-1. Update the GitHub PAT secret:
-   - Go to AWS Secrets Manager console
-   - Find the secret: ${aws_secretsmanager_secret.github_pat.name}
-   - Update the secret value with your actual GitHub Personal Access Token
-   - IMPORTANT: The secret must be in JSON format:
+1. Ensure the GitHub PAT secret is created and populated:
+   - The secret ARN is: ${var.github_pat_secret_arn}
+   - Make sure the secret is populated with your actual GitHub Personal Access Token
+   - The secret must be in JSON format:
      {
        "ServerType": "GITHUB",
        "AuthType": "PERSONAL_ACCESS_TOKEN",

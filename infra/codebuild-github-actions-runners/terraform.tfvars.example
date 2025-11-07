@@ -13,14 +13,11 @@ project_name = "github-runner"
 # VPC ID for CodeBuild (optional, defaults to vpc-18bb4761)
 vpc_id = "vpc-18bb4761"
 
+# GitHub PAT Secret ARN (REQUIRED)
+# IMPORTANT: Create and populate the secret first using the codebuild-github-pat-secret module
+# After creating the secret module, use its output secret_arn value here
+github_pat_secret_arn = "arn:aws:secretsmanager:REGION:ACCOUNT:secret:secret-name"
+
 # Build timeout in minutes (optional, defaults to 60)
 build_timeout = 60
-
-# Tags for resources
-tags = {
-  Project     = "codebuild-github-runners"
-  ManagedBy   = "terraform"
-  Environment = "production"
-  Owner       = "your-team"
-}
 

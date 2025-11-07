@@ -61,13 +61,12 @@ variable "build_timeout" {
   }
 }
 
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default = {
-    Project     = "codebuild-github-runners"
-    ManagedBy   = "terraform"
-    Environment = "production"
+variable "github_pat_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing the GitHub PAT. This should be created and managed separately using the codebuild-github-pat-secret module."
+  type        = string
+  validation {
+    condition     = can(regex("^arn:aws:secretsmanager:", var.github_pat_secret_arn))
+    error_message = "GitHub PAT secret ARN must be a valid Secrets Manager ARN."
   }
 }
 

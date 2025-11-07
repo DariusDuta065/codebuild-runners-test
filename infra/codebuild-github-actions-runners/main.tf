@@ -6,28 +6,27 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "terraform-state-590624982938"
+    key          = "codebuild-github-actions-runners/terraform.tfstate"
+    region       = "eu-west-1"
+    use_lockfile = true
+  }
 }
 
 # Configure the AWS Provider
 provider "aws" {
   region  = var.aws_region
   profile = "default"
-}
 
-# AWS Secrets Manager Secret for GitHub PAT
-resource "aws_secretsmanager_secret" "github_pat" {
-  name        = "${var.project_name}-github-pat"
-  description = "GitHub Personal Access Token for CodeBuild GitHub Actions runner. Secret must be in JSON format: {\"ServerType\":\"GITHUB\",\"AuthType\":\"PERSONAL_ACCESS_TOKEN\",\"Token\":\"your-token-here\"}"
-  tags        = var.tags
-}
-
-resource "aws_secretsmanager_secret_version" "github_pat" {
-  secret_id = aws_secretsmanager_secret.github_pat.id
-  secret_string = jsonencode({
-    ServerType = "GITHUB"
-    AuthType   = "PERSONAL_ACCESS_TOKEN"
-    Token      = "ghp_..."
-  })
+  default_tags {
+    tags = {
+      Project     = "codebuild-github-runners"
+      ManagedBy   = "terraform"
+      Environment = "production"
+    }
+  }
 }
 
 # IAM Role for CodeBuild
@@ -46,8 +45,6 @@ resource "aws_iam_role" "codebuild" {
       }
     ]
   })
-
-  tags = var.tags
 }
 
 # IAM Policy for CodeBuild
@@ -64,7 +61,7 @@ resource "aws_iam_policy" "codebuild" {
           "secretsmanager:GetSecretValue",
           "secretsmanager:DescribeSecret"
         ]
-        Resource = aws_secretsmanager_secret.github_pat.arn
+        Resource = var.github_pat_secret_arn
       },
       {
         Effect = "Allow"
@@ -111,75 +108,11 @@ resource "aws_iam_policy" "codebuild" {
       }
     ]
   })
-
-  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "codebuild" {
   role       = aws_iam_role.codebuild.name
   policy_arn = aws_iam_policy.codebuild.arn
-}
-
-# VPC Configuration (only if vpc_id is provided)
-data "aws_vpc" "main" {
-  count = var.vpc_id != "" ? 1 : 0
-  id    = var.vpc_id
-}
-
-data "aws_subnets" "main" {
-  count = var.vpc_id != "" ? 1 : 0
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main[0].id]
-  }
-}
-
-# Security Group for CodeBuild (only if vpc_id is provided)
-resource "aws_security_group" "codebuild" {
-  count       = var.vpc_id != "" ? 1 : 0
-  name        = "${var.project_name}-sg"
-  description = "Security group for CodeBuild GitHub Actions runners"
-  vpc_id      = data.aws_vpc.main[0].id
-
-  # Allow all IPv4 ingress
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all IPv4 ingress"
-  }
-
-  # Allow all IPv6 ingress
-  ingress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow all IPv6 ingress"
-  }
-
-  # Allow all IPv4 egress
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all IPv4 egress"
-  }
-
-  # Allow all IPv6 egress
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow all IPv6 egress"
-  }
-
-  tags = merge(var.tags, {
-    Name = "${var.project_name}-sg"
-  })
 }
 
 # CodeBuild Project
@@ -201,7 +134,7 @@ resource "aws_codebuild_project" "github_runner" {
 
     environment_variable {
       name  = "GITHUB_PAT_SECRET_ARN"
-      value = aws_secretsmanager_secret.github_pat.arn
+      value = var.github_pat_secret_arn
     }
   }
 
@@ -213,7 +146,7 @@ resource "aws_codebuild_project" "github_runner" {
     # Note: Auth will be configured after GitHub PAT secret is updated with actual token
     auth {
       type     = "SECRETS_MANAGER"
-      resource = aws_secretsmanager_secret.github_pat.arn
+      resource = var.github_pat_secret_arn
     }
   }
 
@@ -232,8 +165,6 @@ resource "aws_codebuild_project" "github_runner" {
       stream_name = "build-log"
     }
   }
-
-  tags = var.tags
 }
 
 # CodeBuild Webhook for GitHub Actions
