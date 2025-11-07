@@ -127,6 +127,26 @@ resource "aws_iam_policy" "lambda_full_access" {
   })
 }
 
+# Create an inline policy for S3 read-only permissions
+resource "aws_iam_policy" "s3_read_only_access" {
+  name        = "${var.role_name}-s3-read-only-access"
+  description = "S3 read-only access permissions for GitHub Actions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:Get*",
+          "s3:List*",
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Attach the policies to the role
 resource "aws_iam_role_policy_attachment" "ecr_policy_attachment" {
   role       = aws_iam_role.github_actions.name
@@ -141,6 +161,11 @@ resource "aws_iam_role_policy_attachment" "ecs_policy_attachment" {
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.lambda_full_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "s3_read_only_policy_attachment" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.s3_read_only_access.arn
 }
 
 # Create an output with the role ARN
