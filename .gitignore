@@ -1,0 +1,81 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files (these contain sensitive data)
+terraform.tfvars
+*.auto.tfvars
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform provider plugin cache
+.terraform/
+
+# Terraform plan files
+*.tfplan
+*.tfplan.*
+
+# Terraform destroy files
+*.tfdestroy
+*.tfdestroy.*
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# AWS credentials and config
+.aws/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.bak
+
+# Certificate and key files
+*.pem
+*.key
+*.crt
+*.cert
+
+# Terraform plugin downloads
+.terraform.d/
+
+# Terraform metadata
+.terraform/providers/
+terraform-provider-*
+
+# Local configuration overrides
+local.tf
+local.tf.json
+dev.tfvars
+prod.tfvars
+staging.tfvars
+test.tfvars
