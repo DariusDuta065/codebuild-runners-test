@@ -12,6 +12,11 @@ data "aws_subnets" "main" {
   }
 }
 
+# Use provided subnet IDs, or all subnets in VPC
+locals {
+  codebuild_subnet_ids = length(var.subnet_ids) > 0 ? var.subnet_ids : (var.vpc_id != "" ? data.aws_subnets.main[0].ids : [])
+}
+
 # Security Group for CodeBuild (only if vpc_id is provided)
 # CodeBuild initiates all connections, so no ingress rules are needed
 # Egress rules allow necessary outbound traffic for builds
@@ -42,6 +47,7 @@ resource "aws_security_group" "codebuild" {
   }
 
   # DNS egress (UDP) for DNS resolution
+  # Note: 0.0.0.0/0 covers all DNS servers including VPC DNS resolver
   egress {
     from_port   = 53
     to_port     = 53
@@ -51,6 +57,7 @@ resource "aws_security_group" "codebuild" {
   }
 
   # DNS egress (TCP) for DNS resolution fallback
+  # Note: 0.0.0.0/0 covers all DNS servers including VPC DNS resolver
   egress {
     from_port   = 53
     to_port     = 53

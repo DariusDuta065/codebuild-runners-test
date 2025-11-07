@@ -131,6 +131,8 @@ resource "aws_codebuild_project" "github_runner" {
     image                       = "aws/codebuild/standard:7.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
+    # Privileged mode is required when running Docker-in-Docker inside a VPC
+    privileged_mode = var.vpc_id != "" ? true : false
 
     environment_variable {
       name  = "GITHUB_PAT_SECRET_ARN"
@@ -154,7 +156,7 @@ resource "aws_codebuild_project" "github_runner" {
     for_each = var.vpc_id != "" ? [1] : []
     content {
       vpc_id             = data.aws_vpc.main[0].id
-      subnets            = data.aws_subnets.main[0].ids
+      subnets            = local.codebuild_subnet_ids
       security_group_ids = [aws_security_group.codebuild[0].id]
     }
   }

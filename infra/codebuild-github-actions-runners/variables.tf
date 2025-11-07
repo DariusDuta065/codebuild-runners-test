@@ -51,6 +51,12 @@ variable "vpc_id" {
   }
 }
 
+variable "subnet_ids" {
+  description = "List of subnet IDs for CodeBuild. If not provided, will use all subnets in the VPC. For private subnets with NAT gateway, provide the private subnet IDs."
+  type        = list(string)
+  default     = []
+}
+
 variable "build_timeout" {
   description = "Build timeout in minutes"
   type        = number
