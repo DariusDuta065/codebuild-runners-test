@@ -31,10 +31,14 @@ jobs:
       - name: Login to Private ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Configure AWS credentials for Public ECR
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.OIDC_IAM_ROLE_ARN }}
+          aws-region: us-east-1
+
       - name: Login to Public ECR
         uses: aws-actions/amazon-ecr-login@v2
-        env:
-          AWS_DEFAULT_REGION: us-east-1
         with:
           registry-type: public
 
