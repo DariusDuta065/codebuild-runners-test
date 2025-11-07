@@ -1,0 +1,22 @@
+# Private Subnets and NAT Gateway Configuration
+
+# AWS region (optional, defaults to eu-west-1)
+aws_region = "eu-west-1"
+
+# Prefix for resource naming (optional, defaults to private-subnets-nat)
+name_prefix = "private-subnets-nat"
+
+# CIDR blocks for the 3 private subnets (REQUIRED)
+# These should not overlap with existing subnets in your VPC
+# Default VPC typically uses 172.31.0.0/16
+# Example: Using 172.31.128.0/20, 172.31.144.0/20, 172.31.160.0/20
+private_subnet_cidrs = [
+  "172.31.128.0/20",
+  "172.31.144.0/20",
+  "172.31.160.0/20"
+]
+
+# Availability zones (optional, will auto-discover from public subnets if not provided)
+# If provided, must have at least 3 zones
+# availability_zones = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+
