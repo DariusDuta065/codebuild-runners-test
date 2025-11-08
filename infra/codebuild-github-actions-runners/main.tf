@@ -1,7 +1,11 @@
-# CodeBuild Project
+# CodeBuild Projects - one per fleet
 resource "aws_codebuild_project" "github_runner" {
-  name          = var.project_name
-  description   = "Self-hosted GitHub Actions runner using AWS CodeBuild"
+  for_each = {
+    for idx, fleet in var.compute_fleets : idx => fleet
+  }
+
+  name          = each.value.name
+  description   = "Self-hosted GitHub Actions runner using AWS CodeBuild (${each.value.architecture}, ${each.value.size_label})"
   build_timeout = var.build_timeout
   service_role  = aws_iam_role.codebuild.arn
 
@@ -10,13 +14,18 @@ resource "aws_codebuild_project" "github_runner" {
   }
 
   environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:7.0"
-    type                        = "LINUX_CONTAINER"
+    compute_type                = "ATTRIBUTE_BASED_COMPUTE"
+    image                       = each.value.image
+    type                        = each.value.architecture == "arm64" ? "ARM_CONTAINER" : "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
 
     # Privileged mode is required when running Docker-in-Docker inside a VPC
-    privileged_mode = var.vpc_id != "" ? true : false
+    # VPC is configured at the fleet level, so check if fleet has VPC config
+    privileged_mode = each.value.vpc_config != null ? true : false
+
+    fleet {
+      fleet_arn = aws_codebuild_fleet.github_runner[each.key].arn
+    }
 
     environment_variable {
       name  = "GITHUB_PAT_SECRET_ARN"
@@ -40,18 +49,12 @@ resource "aws_codebuild_project" "github_runner" {
     }
   }
 
-  dynamic "vpc_config" {
-    for_each = var.vpc_id != "" ? [1] : []
-    content {
-      vpc_id             = data.aws_vpc.main[0].id
-      subnets            = local.codebuild_subnet_ids
-      security_group_ids = [aws_security_group.codebuild[0].id]
-    }
-  }
+  # Note: VPC configuration is handled at the fleet level when using ATTRIBUTE_BASED_COMPUTE
+  # Do not specify vpc_config at the project level when using fleets
 
   logs_config {
     cloudwatch_logs {
-      group_name  = "/aws/codebuild/${var.project_name}"
+      group_name  = "/aws/codebuild/${each.value.name}"
       stream_name = "build-log"
     }
   }

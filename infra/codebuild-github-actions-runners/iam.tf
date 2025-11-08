@@ -70,10 +70,10 @@ resource "aws_iam_policy" "codebuild" {
           "logs:DescribeLogStreams",
           "logs:GetLogEvents"
         ]
-        Resource = [
-          "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${var.project_name}*",
-          "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${var.project_name}*:*"
-        ]
+        Resource = concat(
+          [for idx, fleet in var.compute_fleets : "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${fleet.name}*"],
+          [for idx, fleet in var.compute_fleets : "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${fleet.name}*:*"]
+        )
       }
     ]
   })

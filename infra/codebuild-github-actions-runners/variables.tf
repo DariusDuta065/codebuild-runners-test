@@ -41,22 +41,6 @@ variable "project_name" {
   }
 }
 
-variable "vpc_id" {
-  description = "VPC ID for CodeBuild (leave empty to disable VPC)"
-  type        = string
-  default     = ""
-  validation {
-    condition     = var.vpc_id == "" || can(regex("^vpc-", var.vpc_id))
-    error_message = "VPC ID must be empty or start with 'vpc-'."
-  }
-}
-
-variable "subnet_ids" {
-  description = "List of subnet IDs for CodeBuild. If not provided, will use all subnets in the VPC. For private subnets with NAT gateway, provide the private subnet IDs."
-  type        = list(string)
-  default     = []
-}
-
 variable "build_timeout" {
   description = "Build timeout in minutes"
   type        = number
@@ -79,9 +63,11 @@ variable "github_pat_secret_arn" {
 variable "compute_fleets" {
   description = "List of CodeBuild compute fleets. Defaults to two fleets: Linux x86_64 and Linux ARM64."
   type = list(object({
-    name             = optional(string, null)
+    name             = string
     architecture     = string
     minimum_capacity = number
+    image            = string
+    size_label       = optional(string, "small")
     vpc_config = optional(object({
       vpc_id     = string
       subnet_ids = list(string)
@@ -98,8 +84,11 @@ variable "compute_fleets" {
   }))
   default = [
     {
+      name             = "github-runner-x86_64-small"
       architecture     = "x86_64"
       minimum_capacity = 1
+      image            = "aws/codebuild/standard:7.0"
+      size_label       = "small"
       compute_configuration = {
         vcpu_count = 2
         memory     = 4
@@ -107,8 +96,11 @@ variable "compute_fleets" {
       }
     },
     {
+      name             = "github-runner-arm64-small"
       architecture     = "arm64"
       minimum_capacity = 1
+      image            = "aws/codebuild/standard:7.0"
+      size_label       = "small"
       compute_configuration = {
         vcpu_count = 2
         memory     = 4
@@ -135,6 +127,14 @@ variable "compute_fleets" {
   validation {
     condition     = alltrue([for fleet in var.compute_fleets : fleet.compute_configuration.disk_space == 64])
     error_message = "Disk space must be 64 GB."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : length(fleet.image) > 0])
+    error_message = "Image field is required and cannot be empty."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : length(fleet.name) > 0])
+    error_message = "Name field is required and cannot be empty."
   }
 }
 

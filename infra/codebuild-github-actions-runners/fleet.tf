@@ -4,8 +4,8 @@ resource "aws_security_group" "fleet" {
     if fleet.vpc_config != null
   }
 
-  name        = "${var.project_name}-fleet-${each.value.architecture}-sg"
-  description = "Security group for CodeBuild fleet ${each.value.architecture}"
+  name        = "${each.value.name}-sg"
+  description = "Security group for CodeBuild fleet ${each.value.name}"
   vpc_id      = each.value.vpc_config.vpc_id
 
   egress {
@@ -49,8 +49,9 @@ resource "aws_security_group" "fleet" {
   }
 
   tags = {
-    Name         = "${var.project_name}-fleet-${each.value.architecture}-sg"
+    Name         = "${each.value.name}-sg"
     Architecture = each.value.architecture
+    Size         = each.value.size_label
   }
 }
 
@@ -60,7 +61,7 @@ resource "aws_codebuild_fleet" "github_runner" {
     for idx, fleet in var.compute_fleets : idx => fleet
   }
 
-  name               = each.value.name != null ? each.value.name : "${var.project_name}-fleet-${each.value.architecture}"
+  name               = each.value.name
   compute_type       = "ATTRIBUTE_BASED_COMPUTE"
   environment_type   = each.value.architecture == "arm64" ? "ARM_CONTAINER" : "LINUX_CONTAINER"
   base_capacity      = each.value.minimum_capacity

@@ -10,9 +10,6 @@ aws_region = "eu-west-1"
 # CodeBuild project name (optional, defaults to github-runner)
 project_name = "github-runner"
 
-# VPC ID for CodeBuild (optional, defaults to vpc-18bb4761)
-vpc_id = "vpc-18bb4761"
-
 # GitHub PAT Secret ARN (REQUIRED)
 # IMPORTANT: Create and populate the secret first using the codebuild-github-pat-secret module
 # After creating the secret module, use its output secret_arn value here
@@ -25,42 +22,22 @@ build_timeout = 60
 # Defaults to two fleets: Linux x86_64 and Linux ARM64 (2 vCPU, 4 GB RAM, 64 GB disk each)
 # Constraints: vCPU (2-4), Memory (2-8 GB), Disk (64 GB fixed)
 # Overflow builds always run on-demand
-# See COMPUTE_FLEETS.md for guidance on when to use fleets.
 #
-# Default configuration:
+# Example:
 # compute_fleets = [
 #   {
+#     name             = "gha-x86-small"
 #     architecture     = "x86_64"
 #     minimum_capacity = 1
+#     image            = "aws/codebuild/standard:7.0"
+#     size_label       = "small"
 #   },
 #   {
+#     name             = "gha-arm64-small"
 #     architecture     = "arm64"
 #     minimum_capacity = 1
+#     image            = "aws/codebuild/standard:7.0"
+#     size_label       = "small"
 #   }
 # ]
-#
-# Example: Custom fleet configuration with VPC
-# compute_fleets = [
-#   {
-#     name             = "custom-x86-fleet"
-#     architecture     = "x86_64"
-#     minimum_capacity = 2
-#     vpc_config = {
-#       vpc_id     = "vpc-xxxxxxxxx"
-#       subnet_ids = ["subnet-xxxxx", "subnet-yyyyy"]
-#     }
-#     compute_configuration = {
-#       vcpu_count = 4
-#       memory     = 8
-#       disk_space = 64
-#     }
-#   },
-#   {
-#     architecture     = "arm64"
-#     minimum_capacity = 1
-#   }
-# ]
-#
-# Example: Disable fleets (empty list)
-# compute_fleets = []
 
