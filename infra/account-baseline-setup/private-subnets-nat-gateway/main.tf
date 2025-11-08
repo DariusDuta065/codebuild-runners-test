@@ -58,12 +58,7 @@ data "aws_subnet" "public" {
   id       = each.value
 }
 
-# Get the first public subnet for NAT gateway placement
 locals {
-  public_subnet_ids = data.aws_subnets.public.ids
-  # Use first public subnet for NAT gateway
-  nat_gateway_subnet_id = length(local.public_subnet_ids) > 0 ? local.public_subnet_ids[0] : null
-
   # Get availability zones from public subnets (sorted and unique)
   public_subnet_azs = sort(distinct([
     for subnet in data.aws_subnet.public : subnet.availability_zone
@@ -91,41 +86,10 @@ resource "aws_subnet" "private" {
   }
 }
 
-# Get Internet Gateway for default VPC (default VPCs always have one)
-data "aws_internet_gateway" "default" {
-  filter {
-    name   = "attachment.vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
-
-# Elastic IP for NAT Gateway
-resource "aws_eip" "nat" {
-  domain = "vpc"
-
-  tags = {
-    Name = "${var.name_prefix}-nat-eip"
-  }
-}
-
-# NAT Gateway
-resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = local.nat_gateway_subnet_id
-
-  tags = {
-    Name = "${var.name_prefix}-nat-gateway"
-  }
-}
-
 # Route table for private subnets
+# Note: Route to NAT instance should be added separately
 resource "aws_route_table" "private" {
   vpc_id = data.aws_vpc.default.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
-  }
 
   tags = {
     Name = "${var.name_prefix}-private-rt"

@@ -21,3 +21,46 @@ github_pat_secret_arn = "arn:aws:secretsmanager:REGION:ACCOUNT:secret:secret-nam
 # Build timeout in minutes (optional, defaults to 60)
 build_timeout = 60
 
+# CodeBuild Compute Fleet Configuration (optional)
+# Defaults to two fleets: Linux x86_64 and Linux ARM64 (2 vCPU, 4 GB RAM, 64 GB disk each)
+# Constraints: vCPU (2-4), Memory (2-8 GB), Disk (64 GB fixed)
+# Overflow builds always run on-demand
+# See COMPUTE_FLEETS.md for guidance on when to use fleets.
+#
+# Default configuration:
+# compute_fleets = [
+#   {
+#     architecture     = "x86_64"
+#     minimum_capacity = 1
+#   },
+#   {
+#     architecture     = "arm64"
+#     minimum_capacity = 1
+#   }
+# ]
+#
+# Example: Custom fleet configuration with VPC
+# compute_fleets = [
+#   {
+#     name             = "custom-x86-fleet"
+#     architecture     = "x86_64"
+#     minimum_capacity = 2
+#     vpc_config = {
+#       vpc_id     = "vpc-xxxxxxxxx"
+#       subnet_ids = ["subnet-xxxxx", "subnet-yyyyy"]
+#     }
+#     compute_configuration = {
+#       vcpu_count = 4
+#       memory     = 8
+#       disk_space = 64
+#     }
+#   },
+#   {
+#     architecture     = "arm64"
+#     minimum_capacity = 1
+#   }
+# ]
+#
+# Example: Disable fleets (empty list)
+# compute_fleets = []
+

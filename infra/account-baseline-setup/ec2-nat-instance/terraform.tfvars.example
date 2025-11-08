@@ -1,10 +1,10 @@
-# Private Subnets and NAT Gateway Configuration
+# EC2 NAT Instance (fck-nat) Configuration
 
 # AWS region (optional, defaults to eu-west-1)
 aws_region = "eu-west-1"
 
-# Prefix for resource naming (optional, defaults to private-subnets-nat)
-name_prefix = "private-subnets-nat"
+# Prefix for resource naming (optional, defaults to ec2-nat-instance)
+name_prefix = "ec2-nat-instance"
 
 # CIDR blocks for the 3 private subnets (REQUIRED)
 # These should not overlap with existing subnets in your VPC

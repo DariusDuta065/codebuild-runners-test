@@ -18,6 +18,27 @@ output "security_group_id" {
   value       = var.vpc_id != "" ? aws_security_group.codebuild[0].id : null
 }
 
+output "fleet_arns" {
+  description = "Map of fleet ARNs keyed by fleet index and architecture"
+  value = {
+    for idx, fleet in var.compute_fleets : "${idx}-${fleet.architecture}" => aws_codebuild_fleet.github_runner[idx].arn
+  }
+}
+
+output "fleet_ids" {
+  description = "Map of fleet IDs keyed by fleet index and architecture"
+  value = {
+    for idx, fleet in var.compute_fleets : "${idx}-${fleet.architecture}" => aws_codebuild_fleet.github_runner[idx].id
+  }
+}
+
+output "fleet_names" {
+  description = "Map of fleet names keyed by fleet index and architecture"
+  value = {
+    for idx, fleet in var.compute_fleets : "${idx}-${fleet.architecture}" => aws_codebuild_fleet.github_runner[idx].name
+  }
+}
+
 output "setup_instructions" {
   description = "Instructions for using the runner"
   value       = <<-EOF
@@ -46,6 +67,7 @@ output "setup_instructions" {
 3. CodeBuild Project Name: ${aws_codebuild_project.github_runner.name}
 4. CodeBuild Project ARN: ${aws_codebuild_project.github_runner.arn}
 5. Security Group ID: ${var.vpc_id != "" ? aws_security_group.codebuild[0].id : "N/A (VPC disabled)"}
+${length(var.compute_fleets) > 0 ? "6. Compute Fleets:\n${join("\n", [for idx, fleet in var.compute_fleets : "   - ${fleet.architecture}: ${aws_codebuild_fleet.github_runner[idx].name} (ARN: ${aws_codebuild_fleet.github_runner[idx].arn})"])}" : "6. Compute Fleets: None configured"}
 EOF
 }
 

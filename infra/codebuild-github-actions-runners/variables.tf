@@ -76,3 +76,65 @@ variable "github_pat_secret_arn" {
   }
 }
 
+variable "compute_fleets" {
+  description = "List of CodeBuild compute fleets. Defaults to two fleets: Linux x86_64 and Linux ARM64."
+  type = list(object({
+    name             = optional(string, null)
+    architecture     = string
+    minimum_capacity = number
+    vpc_config = optional(object({
+      vpc_id     = string
+      subnet_ids = list(string)
+    }), null)
+    compute_configuration = optional(object({
+      vcpu_count = optional(number, 2)
+      memory     = optional(number, 4)
+      disk_space = optional(number, 64)
+      }), {
+      vcpu_count = 2
+      memory     = 4
+      disk_space = 64
+    })
+  }))
+  default = [
+    {
+      architecture     = "x86_64"
+      minimum_capacity = 1
+      compute_configuration = {
+        vcpu_count = 2
+        memory     = 4
+        disk_space = 64
+      }
+    },
+    {
+      architecture     = "arm64"
+      minimum_capacity = 1
+      compute_configuration = {
+        vcpu_count = 2
+        memory     = 4
+        disk_space = 64
+      }
+    }
+  ]
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : contains(["x86_64", "arm64"], fleet.architecture)])
+    error_message = "Architecture must be 'x86_64' or 'arm64'."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : fleet.minimum_capacity > 0 && fleet.minimum_capacity <= 100])
+    error_message = "Minimum capacity must be between 1 and 100."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : fleet.compute_configuration.vcpu_count >= 1 && fleet.compute_configuration.vcpu_count <= 4])
+    error_message = "vCPU count must be between 1 and 4."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : fleet.compute_configuration.memory >= 2 && fleet.compute_configuration.memory <= 8])
+    error_message = "Memory must be between 2 and 8 GB."
+  }
+  validation {
+    condition     = alltrue([for fleet in var.compute_fleets : fleet.compute_configuration.disk_space == 64])
+    error_message = "Disk space must be 64 GB."
+  }
+}
+

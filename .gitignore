@@ -1,3 +1,7 @@
+# Ignored files
+infra/ec2-private-subnet-nat-instance-test/
+docs/
+
 # Local .terraform directories
 **/.terraform/*
 

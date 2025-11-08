@@ -40,6 +40,12 @@ provider "aws" {
 resource "aws_secretsmanager_secret" "github_pat" {
   name        = "${var.secret_name}-github-pat"
   description = "GitHub Personal Access Token for CodeBuild GitHub Actions runner. Secret must be in JSON format: {\"ServerType\":\"GITHUB\",\"AuthType\":\"PERSONAL_ACCESS_TOKEN\",\"Token\":\"your-token-here\"}"
+
+  tags = {
+    "codebuild:source"          = ""
+    "codebuild:source:provider" = "github"
+    "codebuild:source:type"     = "personal_access_token"
+  }
 }
 
 # Initial placeholder version - MUST be updated manually with actual token
