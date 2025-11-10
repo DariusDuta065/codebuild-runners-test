@@ -7,37 +7,59 @@ github_username = "your-github-username"
 # AWS region (optional, defaults to eu-west-1)
 aws_region = "eu-west-1"
 
-# CodeBuild project name (optional, defaults to github-runner)
-project_name = "github-runner"
-
-# GitHub PAT Secret ARN (REQUIRED)
-# IMPORTANT: Create and populate the secret first using the codebuild-github-pat-secret module
-# After creating the secret module, use its output secret_arn value here
-github_pat_secret_arn = "arn:aws:secretsmanager:REGION:ACCOUNT:secret:secret-name"
-
 # Build timeout in minutes (optional, defaults to 60)
 build_timeout = 60
 
-# CodeBuild Compute Fleet Configuration (optional)
-# Defaults to two fleets: Linux x86_64 and Linux ARM64 (2 vCPU, 4 GB RAM, 64 GB disk each)
-# Constraints: vCPU (2-4), Memory (2-8 GB), Disk (64 GB fixed)
-# Overflow builds always run on-demand
+# CodeBuild Runners Configuration (optional)
+# Supports both Compute Fleets (with reserved capacity) and On-Demand projects
+# Defaults to two fleet runners: Linux x86_64 and Linux ARM64 (2 vCPU, 4 GB RAM, 64 GB disk each)
+# Constraints: vCPU (1-4), Memory (2-8 GB), Disk (64 GB fixed)
+# Overflow builds always run on-demand for fleet runners
 #
-# Example:
-# compute_fleets = [
+# Example: Fleet runners with reserved capacity
+# runners = [
 #   {
 #     name             = "gha-x86-small"
+#     compute_type     = "FLEET"
 #     architecture     = "x86_64"
 #     minimum_capacity = 1
 #     image            = "aws/codebuild/standard:7.0"
 #     size_label       = "small"
+#     compute_configuration = {
+#       vcpu_count = 2
+#       memory     = 4
+#       disk_space = 64
+#     }
 #   },
 #   {
 #     name             = "gha-arm64-small"
+#     compute_type     = "FLEET"
 #     architecture     = "arm64"
 #     minimum_capacity = 1
 #     image            = "aws/codebuild/standard:7.0"
 #     size_label       = "small"
+#     compute_configuration = {
+#       vcpu_count = 2
+#       memory     = 4
+#       disk_space = 64
+#     }
+#   }
+# ]
+#
+# Example: On-demand runners (no reserved capacity, on_demand_compute_type required)
+# runners = [
+#   {
+#     name                  = "gha-x86-on-demand"
+#     compute_type          = "ON_DEMAND"
+#     on_demand_compute_type = "BUILD_GENERAL1_SMALL"
+#     architecture          = "x86_64"
+#     image                 = "aws/codebuild/standard:7.0"
+#     size_label            = "small"
+#     compute_configuration = {
+#       vcpu_count = 2
+#       memory     = 4
+#       disk_space = 64
+#     }
 #   }
 # ]
 
