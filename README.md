@@ -8,10 +8,11 @@ Testing self-hosted GitHub Actions runners using AWS CodeBuild.
   - The solution would be to cover as many jobs with reserved capacity as possible (20s to see progress on GitHub Actions Web UI)
 - Out of ~100 Webhook calls (GitHub -> CodeBuild, in order to trigger a build), only 1 failed to deliver and had to be manually retried.
   - The solution would be to write a custom Lambda function to handle the webhook delivery and retry logic.
-  - GitHub will **not** retry webhook delivery. 
+  - GitHub will **not** retry webhook delivery: [source](https://docs.github.com/en/webhooks/testing-and-troubleshooting-webhooks/redelivering-webhooks) 
     - The reason is that GitHub does not know if the webhook was handled and refused (e.g. we have 2 CodeBuild projects (X86 and ARM) with 2 Webhooks, only the ARM one should be called, but GitHub would call *all* webhooks and let them refuse the call (the X86 would say "Wrong project name" and return a non-200 status code)
-- DR: The availability is the combined availability of GitHub Webhooks and CodeBuild. Since the solution is fully-managed, we depend on these two services to be available. The Lambda function that retries webhook deliveries can help improve the availability by retrying the delivery with an exponential backoff.
+- DR: The availability of this solution strictly depends on the combined availability of GitHub Webhooks and CodeBuild. Since the solution is fully-managed, we depend on these two services to be available. The Lambda function that retries webhook deliveries can help improve the availability by retrying the delivery with an exponential backoff.
   - However, if GitHub Webhooks are not available, then we're stuck waiting for GitHub to resume webhook deliveries.
+  
 
 ## Infrastructure Overview
 
@@ -25,17 +26,21 @@ Testing self-hosted GitHub Actions runners using AWS CodeBuild.
 
 ## Discoveries
 
-- One CodeBuild project maps directly to one webhook. Multiple webhooks are required for multiple projects to avoid developers specifying fleet labels in `runs-on`. GitHub limits webhooks to 20 per event type for both repositories and organizations (250 for GitHub Enterprise Server).
-- CodeBuild reserved capacity is used as part of our DR strategy to improve the resilience of the CI/CD platform by always having at least N runners available of each type, ensuring we never have to compete with other AWS customers for capacity. Reserved capacity for a 2 vCPU, 4GB RAM instance costs approximately $36-72 per month per instance (pricing varies by region and may change).
-- Compute fleet overflow behavior has been tested and works correctly. When demand exceeds reserved capacity, overflow jobs automatically run on-demand with CodeBuild.
+- **One CodeBuild project maps directly to one webhook**. Multiple webhooks are required for multiple projects to avoid developers specifying fleet labels in `runs-on`. GitHub limits webhooks to 20 per event type for both repositories and organizations (250 for GitHub Enterprise Server).
+  - GitHub sends the webhook payload to all webhooks for the event type (e.g. `workflow_job_queued`) for the repository or organization. This is fine, as CodeBuild Build Projects that do not match the `runs-on` label will return a 400 Bad Request status code, saying: (`{"message":"Project name in label gha-x86-small did not match actual project name"}`).
+  - Only the matching CodeBuild Project will actually run the job.
+- **CodeBuild reserved capacity** can be used as part of our DR strategy to improve the resilience of the CI/CD platform by always having at least N runners available of each type, ensuring we never have to compete with other AWS customers for capacity. Reserved capacity for a 2 vCPU, 4GB RAM instance costs approximately $36-72 per month per instance (pricing varies by region and may change).
+- **Compute fleet overflow behavior** has been tested and works correctly. When demand exceeds reserved capacity, overflow jobs automatically run on-demand with CodeBuild.
   - Reserved capacity provisioning: Internal CodeBuild provisioning time is approximately 3 seconds, with total wait time from job start to execution typically 20-30 seconds.
   - On-demand provisioning: Requires an additional ~15 seconds for CodeBuild to provision a new server, resulting in total wait times of 30-45 seconds. Observed maximum queue time for on-demand builds is up to 90 seconds.
   - Reserved capacity significantly reduces queuing and provisioning time compared to on-demand, making it essential for consistent CI/CD performance.
-- VPC integration should be avoided unless necessary. The goal is to have managed GitHub runners that don't require maintenance and reduce support tickets. The CI/CD system should remain stateless to ensure consistent behavior across different runners—running the same job on two different runners should behave exactly the same. Integrating runners with different VPCs risks losing statelessness as teams may request VPC-specific connections.
+- **VPC integration should be avoided unless necessary**. The goal is to have managed GitHub runners that don't require maintenance and reduce support tickets. The CI/CD system should remain stateless to ensure consistent behavior across different runners—running the same job on two different runners should behave exactly the same. Integrating runners with different VPCs risks losing statelessness as teams may request VPC-specific connections.
   - Enabling VPC integration gives access to VPC endpoints, which are a cost-saving feature rather than a performance feature. As current costs are $0, we should wait and observe when it's worth adding VPC endpoints for services like ECR, S3, and others, balancing the costs with all other factors and risks involved.
-- CodeBuild has a [Docker Server capability](https://aws.amazon.com/blogs/aws/accelerate-ci-cd-pipelines-with-the-new-aws-codebuild-docker-server-capability/) feature, which is a dedicated persistent Docker server that can accelerate Docker image builds by centralizing image building to a remote host with persistent caching. However, as noted at the end of the blog post, ARM builds are not supported. Since we are heavily pushing for ARM as it's cheaper and faster, we cannot use this feature for this reason, so it's not going to be taken into consideration.
+- CodeBuild has a [Docker Server capability](https://aws.amazon.com/blogs/aws/accelerate-ci-cd-pipelines-with-the-new-aws-codebuild-docker-server-capability/) feature, which is a dedicated persistent Docker server that can accelerate Docker image builds by centralizing image building to a remote host with persistent caching. However, as noted at the end of the blog post, ARM builds are not supported. 
+  - Since we are heavily pushing for ARM as it's cheaper and faster, **we cannot use this feature** for this reason, so it's not going to be taken into consideration.
 - When using CodeBuild compute fleets, VPC configuration is done within the fleet definition, not at the CodeBuild project level.
-- When using AWS CodeConnections with CodeBuild, the CodeBuild service role needs permissions to associate the connection with the build project. The service role requires `codeconnections:UseConnection`, `codeconnections:ListConnections`, and `codeconnections:GetConnection` permissions. CodeBuild automatically associates the CodeConnections connection to the project when the service role has these permissions—no additional configuration is needed beyond specifying the connection ARN in the source auth block.
+- When using AWS CodeConnections with CodeBuild, the **CodeBuild service role needs permissions to associate the connection with the build project**. 
+  - The service role requires `codeconnections:UseConnection`, `codeconnections:ListConnections`, and `codeconnections:GetConnection` permissions. CodeBuild automatically associates the CodeConnections connection to the project when the service role has these permissions—no additional configuration is needed beyond specifying the connection ARN in the source auth block.
 
 ---
 
