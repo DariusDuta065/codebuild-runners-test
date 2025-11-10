@@ -94,16 +94,15 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 | [aws_security_group.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_iam_policy_document.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.codebuild_service_role_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
 | Name | Description | Default | Required |
 |------|-------------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be created | `"eu-west-1"` | no |
 | <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `60` | no |
+| <a name="input_codebuild_location"></a> [codebuild\_location](#input\_codebuild\_location) | Target for CodeBuild: provide either the GitHub repository URL (https://github.com/owner/repo) or the GitHub organization name. | n/a | yes |
 | <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | n/a | yes |
-| <a name="input_github_repository_url"></a> [github\_repository\_url](#input\_github\_repository\_url) | GitHub repository URL for CodeBuild source. Use format: https://github.com/username/repo | `""` | no |
-| <a name="input_github_username"></a> [github\_username](#input\_github\_username) | Your GitHub username or organization name | n/a | yes |
 | <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small"<br/>  }<br/>]</pre> | no |
 
 ## Outputs

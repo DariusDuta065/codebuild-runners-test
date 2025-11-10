@@ -38,13 +38,6 @@ Testing self-hosted GitHub Actions runners using AWS CodeBuild.
 - When using CodeBuild compute fleets, VPC configuration is done within the fleet definition, not at the CodeBuild project level.
 - When using AWS CodeConnections with CodeBuild, the CodeBuild service role needs permissions to associate the connection with the build project. The service role requires `codeconnections:UseConnection`, `codeconnections:ListConnections`, and `codeconnections:GetConnection` permissions. CodeBuild automatically associates the CodeConnections connection to the project when the service role has these permissions—no additional configuration is needed beyond specifying the connection ARN in the source auth block.
 
-## Next todos
-
-- GitHub App approach should work out of the box. AWS should set up the webhooks via the GitHub App! There's no need to manually/IaC the webhooks!!
-- Fix IAM perms of the CodeBuild service role: https://docs.aws.amazon.com/codebuild/latest/userguide/multiple-access-tokens.html#asm-account-credential instead of "*:*"
-- Secondary source credentials as a backup to the GitHub App...
-- TF module should support both Compute Fleets and On-Demand projects.
-
 ---
 
 # GitHub Apps Limitations
@@ -52,18 +45,18 @@ If your company already has an AWS CodeBuild GitHub App integration set up—whe
 
 ### Multiple GitHub App Installations
 
-- GitHub Apps can be installed on multiple GitHub organizations, repositories, or personal accounts, and there is no technical restriction on the number of simultaneous installations. Each installation is independent and governed by its own permissions and repository access scopes[2][14].
-- When you install the AWS CodeBuild App in a GitHub organization or repo, you can choose which repositories to grant it access to. These choices do not affect other installations or AWS accounts using their own CodeBuild connections, even if they're pointed at the same or different repositories[4].
+- GitHub Apps can be installed on multiple GitHub organizations, repositories, or personal accounts, and there is no technical restriction on the number of simultaneous installations. Each installation is independent and governed by its own permissions and repository access scopes.
+- When you install the AWS CodeBuild App in a GitHub organization or repo, you can choose which repositories to grant it access to. These choices do not affect other installations or AWS accounts using their own CodeBuild connections, even if they're pointed at the same or different repositories.
 
 ### AWS Account and Region Segmentation
 
-- Each AWS account can create its own CodeBuild GitHub App connection, even if the same company manages multiple AWS accounts for different environments (development, staging, production, etc.)[4][8].
-- CodeBuild connections are generally region-specific. Connections created in a specific AWS region can only be used in that region, meaning connections in account A in US East (N. Virginia) and account B in EU (Frankfurt) are entirely separate and will not conflict[4].
-- If you need to share a connection across multiple AWS accounts, AWS supports connection sharing features, allowing controlled cross-account access without impacting other setups[4].
+- Each AWS account can create its own CodeBuild GitHub App connection, even if the same company manages multiple AWS accounts for different environments (development, staging, production, etc.).
+- CodeBuild connections are generally region-specific. Connections created in a specific AWS region can only be used in that region, meaning connections in account A in US East (N. Virginia) and account B in EU (Frankfurt) are entirely separate and will not conflict.
+- If you need to share a connection across multiple AWS accounts, AWS supports connection sharing features, allowing controlled cross-account access without impacting other setups.
 
 ### Independence and No Mutual Impact
 
-- Multiple CodeBuild App connections (whether across different AWS accounts or regions) operate independently without interfering with each other’s triggers, permissions, or build pipelines[4][2].
+- Multiple CodeBuild App connections (whether across different AWS accounts or regions) operate independently without interfering with each other’s triggers, permissions, or build pipelines.
 - Permissions, triggers, and repository access for each App installation are configured separately, ensuring that changing or deleting one does not affect the others.
 
 ### Summary Table
@@ -73,12 +66,3 @@ If your company already has an AWS CodeBuild GitHub App integration set up—whe
 | Multiple AWS accounts, same region       | Yes                    | No                         |
 | Multiple AWS accounts, different regions | Yes                    | No                         |
 | Multiple organizations on GitHub         | Yes                    | No                         |
-
-### Best Practices
-
-- Review and control repository access and App permissions during each installation to avoid accidental over-privilege[2].
-- Reference the AWS documentation on region and account setup for nuances regarding connection sharing or limitations[4].
-- For custom, cross-account or cross-region workflows, set up IAM roles and follow AWS security best practices[8].
-
-
-

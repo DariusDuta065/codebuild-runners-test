@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 # Security groups for CodeBuild projects with VPC (both on-demand and fleet)
 resource "aws_security_group" "codebuild" {
   for_each = {
@@ -92,20 +94,17 @@ resource "aws_codebuild_project" "github_runner" {
 
   source {
     type     = "GITHUB"
-    location = var.github_repository_url != "" ? var.github_repository_url : "https://github.com/${var.github_username}/codebuild-runners-test"
+    location = var.codebuild_location
 
     git_clone_depth = 1
     git_submodules_config {
       fetch_submodules = false
     }
 
-    # Use CodeConnections if provided
-    dynamic "auth" {
-      for_each = var.codeconnections_connection_arn != "" ? [1] : []
-      content {
-        type     = "CODECONNECTIONS"
-        resource = var.codeconnections_connection_arn
-      }
+    # Use CodeConnections via GitHub App integration
+    auth {
+      type     = "CODECONNECTIONS"
+      resource = var.codeconnections_connection_arn
     }
   }
 

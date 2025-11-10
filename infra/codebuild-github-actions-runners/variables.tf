@@ -1,29 +1,9 @@
-variable "github_username" {
-  description = "Your GitHub username or organization name"
+variable "codebuild_location" {
+  description = "Target for CodeBuild: provide either the GitHub repository URL (https://github.com/owner/repo) or the GitHub organization name."
   type        = string
   validation {
-    condition     = length(var.github_username) > 0
-    error_message = "GitHub username cannot be empty."
-  }
-}
-
-variable "github_repository_url" {
-  description = "GitHub repository URL for CodeBuild source. Use format: https://github.com/username/repo"
-  type        = string
-  default     = ""
-  validation {
-    condition     = var.github_repository_url == "" || can(regex("^https://github\\.com/", var.github_repository_url))
-    error_message = "GitHub repository URL must be empty or start with https://github.com/"
-  }
-}
-
-variable "aws_region" {
-  description = "AWS region where resources will be created"
-  type        = string
-  default     = "eu-west-1"
-  validation {
-    condition     = length(var.aws_region) > 0
-    error_message = "AWS region cannot be empty."
+    condition     = length(var.codebuild_location) > 0
+    error_message = "codebuild_location is required and cannot be empty."
   }
 }
 

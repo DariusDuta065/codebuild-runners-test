@@ -26,7 +26,7 @@ For the GitHub Actions runners module, run:
 
 ```bash
 cd codebuild-runners-test
-terraform-docs markdown table infra/codebuild-github-actions-runners --output-file README.md --output-mode inject
+terraform-docs --config .terraform-docs.yml .
 ```
 
 General guidance:

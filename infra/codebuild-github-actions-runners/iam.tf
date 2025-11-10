@@ -44,11 +44,11 @@ data "aws_iam_policy_document" "codebuild" {
     actions = [
       "ec2:CreateNetworkInterfacePermission"
     ]
-    resources = ["arn:aws:ec2:${var.aws_region}:*:network-interface/*"]
+    resources = ["arn:aws:ec2:${data.aws_region.current.name}:*:network-interface/*"]
     condition {
       test     = "StringLike"
       variable = "ec2:Subnet"
-      values   = ["arn:aws:ec2:${var.aws_region}:*:subnet/*"]
+      values   = ["arn:aws:ec2:${data.aws_region.current.name}:*:subnet/*"]
     }
     condition {
       test     = "StringLike"
@@ -72,8 +72,8 @@ data "aws_iam_policy_document" "codebuild" {
         "logs:GetLogEvents"
       ]
       resources = concat(
-        [for idx, runner in var.runners : "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${runner.name}*"],
-        [for idx, runner in var.runners : "arn:aws:logs:${var.aws_region}:*:log-group:/aws/codebuild/${runner.name}*:*"]
+        [for idx, runner in var.runners : "arn:aws:logs:${data.aws_region.current.name}:*:log-group:/aws/codebuild/${runner.name}*"],
+        [for idx, runner in var.runners : "arn:aws:logs:${data.aws_region.current.name}:*:log-group:/aws/codebuild/${runner.name}*:*"]
       )
     }
   }
@@ -112,7 +112,7 @@ data "aws_iam_policy_document" "codebuild" {
       ]
       # Allow webhook management for all CodeBuild projects in the region
       # CodeBuild service needs this to create webhooks for projects it manages
-      resources = ["arn:aws:codebuild:${var.aws_region}:*:project/*"]
+      resources = ["arn:aws:codebuild:${data.aws_region.current.name}:*:project/*"]
     }
   }
 }
@@ -178,7 +178,7 @@ resource "aws_iam_policy" "codebuild_fleet" {
         Sid      = "AllowCloudWatchLogsForFleet"
         Effect   = "Allow"
         Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
-        Resource = "arn:aws:logs:${var.aws_region}:*:*"
+        Resource = "arn:aws:logs:${data.aws_region.current.name}:*:*"
       }
     ]
   })

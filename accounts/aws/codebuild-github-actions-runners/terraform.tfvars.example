@@ -1,16 +1,10 @@
 # Copy this file to terraform.tfvars and customize the values
 
-# Your GitHub username or organization name (REQUIRED)
-# This is used to configure the CodeBuild project source
-github_username = "your-github-username-or-org"
-
-# Optionally, you can specify the full GitHub repository URL instead of inferring it
-# from the username/org. For example:
-# github_repository_url = "https://github.com/your-github-username-or-org/your-repo"
-# If not set, the module may derive it from other inputs depending on your setup.
-
-# AWS region (optional, defaults to eu-west-1)
-aws_region = "eu-west-1"
+# CodeBuild location: GitHub repository URL or organization name (REQUIRED)
+# Provide either:
+# - A GitHub repository URL: https://github.com/owner/repo
+# - A GitHub organization name: owner
+codebuild_location = "https://github.com/your-github-username-or-org/your-repo"
 
 # CodeConnections connection ARN for GitHub (using GitHub App)
 # When provided, CodeConnections will be used instead of webhooks and PAT authentication.
