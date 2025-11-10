@@ -30,6 +30,6 @@ terraform-docs --config .terraform-docs.yml .
 ```
 
 General guidance:
-- Always run these commands in the directory that contains the relevant Terraform configuration (for example, `codebuild-runners-test/infra/...`).
+- Always run these commands in the directory that contains the relevant Terraform configuration (for example, `codebuild-runners-test/modules/...`).
 - Fix any reported errors or warnings before committing.
 - If you add a new Terraform module that should have docs, configure `terraform-docs` (e.g. via a `.terraform-docs.yml`) and include the appropriate update command in its README.

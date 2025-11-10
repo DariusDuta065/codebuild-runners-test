@@ -1,8 +1,0 @@
-# GitHub PAT Secret Configuration
-
-# AWS region
-aws_region = "eu-west-1"
-
-# Base name for the secret (will be suffixed with '-github-pat')
-secret_name = "github-runner"
-

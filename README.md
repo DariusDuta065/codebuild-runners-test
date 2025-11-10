@@ -15,14 +15,13 @@ Testing self-hosted GitHub Actions runners using AWS CodeBuild.
 
 ## Infrastructure Overview
 
-- `infra/account-baseline-setup`: Account-specific baseline infrastructure for a low-usage AWS account, including EC2 NAT instance configuration.
+- `modules/account-baseline-setup`: Account-specific baseline infrastructure for a low-usage AWS account, including EC2 NAT instance configuration.
   - `ec2-nat-instance`: Configures an EC2 instance to act as a NAT gateway using FCK-NAT, providing a cost-effective alternative to managed NAT gateways (approximately 90% cost reduction).
   - `ec2-private-subnet-nat-instance-test`: Launches a test EC2 instance in a private subnet for validating NAT functionality via SSM Session Manager.
   - `github-actions-oidc-role`: Configures IAM OIDC provider and role for GitHub Actions to authenticate with AWS without long-lived credentials.
   - `private-ecr-repo-example`: Example ECR repository for testing container image push and pull operations from private subnets.
   - `private-subnets-nat-gateway`: Creates private subnets for the default VPC, which does not include private subnets by default.
-- `infra/codebuild-github-actions-runners`: Configures self-hosted GitHub Actions runners using AWS CodeBuild, including compute fleets, webhooks, and VPC integration.
-- `infra/github-pat-secret`: Creates an AWS Secrets Manager secret containing a GitHub Personal Access Token formatted in the JSON structure required by CodeBuild.
+- `modules/codebuild-github-actions-runners`: Configures self-hosted GitHub Actions runners using AWS CodeBuild, including compute fleets, webhooks, and VPC integration.
 
 ## Discoveries
 

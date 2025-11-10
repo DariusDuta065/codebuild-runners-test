@@ -1,5 +1,5 @@
 module "codebuild-github-actions-runners" {
-  source = "../../../infra/codebuild-github-actions-runners"
+  source = "../../../modules/codebuild-github-actions-runners"
 
   github_config                  = var.github_config
   build_timeout                  = var.build_timeout
