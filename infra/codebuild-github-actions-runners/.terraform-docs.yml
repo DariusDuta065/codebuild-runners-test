@@ -1,0 +1,30 @@
+formatter: markdown table
+
+settings:
+  hide-empty: true
+  lockfile: false
+output:
+  file: README.md
+  mode: inject
+  template: |-  
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+  recursive: false
+  sort-by: required
+
+sections:
+  hide:
+    - modules
+
+content: |-
+  {{ include "docs/module-description.md" }}
+
+
+  # Terraform Module Documentation
+
+  {{ .Resources }}
+
+  {{ .Inputs }}
+
+  {{ .Outputs }}

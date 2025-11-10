@@ -47,15 +47,15 @@ variable "codeconnections_connection_arn" {
 }
 
 variable "runners" {
-  description = "List of CodeBuild runners. Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to two fleet runners: Linux x86_64 and Linux ARM64."
+  description = "List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86_64."
   type = list(object({
     name                   = string
     compute_type           = string # "FLEET" or "ON_DEMAND"
     architecture           = string
-    image                  = string
+    image                  = string # See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
     size_label             = optional(string, "small")
     minimum_capacity       = optional(number) # Required only for compute_type = "FLEET"
-    on_demand_compute_type = optional(string) # Required only for compute_type = "ON_DEMAND". Valid values: BUILD_GENERAL1_SMALL, BUILD_GENERAL1_MEDIUM, BUILD_GENERAL1_LARGE, BUILD_GENERAL1_XLARGE, BUILD_GENERAL1_2XLARGE, BUILD_LAMBDA_1GB, BUILD_LAMBDA_2GB, BUILD_LAMBDA_4GB, BUILD_LAMBDA_8GB, BUILD_LAMBDA_10GB, CUSTOM_INSTANCE_TYPE
+    on_demand_compute_type = optional(string) # Required only for compute_type = "ON_DEMAND". See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html
 
     vpc_config = optional(object({
       vpc_id     = string
@@ -79,20 +79,7 @@ variable "runners" {
       compute_type     = "FLEET"
       architecture     = "x86_64"
       minimum_capacity = 1
-      image            = "aws/codebuild/standard:7.0"
-      size_label       = "small"
-      compute_configuration = {
-        vcpu_count = 2
-        memory     = 4
-        disk_space = 64
-      }
-    },
-    {
-      name             = "github-runner-arm64-small"
-      compute_type     = "FLEET"
-      architecture     = "arm64"
-      minimum_capacity = 1
-      image            = "aws/codebuild/standard:7.0"
+      image            = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
       size_label       = "small"
       compute_configuration = {
         vcpu_count = 2

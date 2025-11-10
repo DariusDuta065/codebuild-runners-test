@@ -1,3 +1,4 @@
+<!-- BEGIN_TF_DOCS -->
 # CodeBuild GitHub Actions Runners
 
 Terraform module for setting up self-hosted GitHub Actions runners using AWS CodeBuild. Supports both Compute Fleets (with reserved capacity) and On-Demand projects.
@@ -74,12 +75,46 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
    
    Available labels are shown in the `workflow_runner_labels` output.
 
+
+# Terraform Module Documentation
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_codebuild_fleet.github_runner](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_fleet) | resource |
+| [aws_codebuild_project.github_runner](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
+| [aws_codebuild_webhook.github_runner](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_webhook) | resource |
+| [aws_iam_policy.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.codebuild_fleet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.codebuild_fleet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.codebuild_service_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.codebuild_fleet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_security_group.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_iam_policy_document.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codebuild_service_role_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be created | `string` | `"eu-west-1"` | no |
+| <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `number` | `60` | no |
+| <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | `string` | n/a | yes |
+| <a name="input_github_repository_url"></a> [github\_repository\_url](#input\_github\_repository\_url) | GitHub repository URL for CodeBuild source. Use format: https://github.com/username/repo | `string` | `""` | no |
+| <a name="input_github_username"></a> [github\_username](#input\_github\_username) | Your GitHub username or organization name | `string` | n/a | yes |
+| <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>list(object({<br/>    name                   = string<br/>    compute_type           = string # "FLEET" or "ON_DEMAND"<br/>    architecture           = string<br/>    image                  = string # See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html<br/>    size_label             = optional(string, "small")<br/>    minimum_capacity       = optional(number) # Required only for compute_type = "FLEET"<br/>    on_demand_compute_type = optional(string) # Required only for compute_type = "ON_DEMAND". See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html<br/><br/>    vpc_config = optional(object({<br/>      vpc_id     = string<br/>      subnet_ids = list(string)<br/>    }), null)<br/><br/>    compute_configuration = optional(object({<br/>      vcpu_count = optional(number, 2)<br/>      memory     = optional(number, 4)<br/>      disk_space = optional(number, 64)<br/>      }), {<br/>      vcpu_count = 2<br/>      memory     = 4<br/>      disk_space = 64<br/>    })<br/>  }))</pre> | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small",<br/>    "size_label": "small"<br/>  }<br/>]</pre> | no |
+
 ## Outputs
 
-- `workflow_runner_labels`: Array of runner labels for use in GitHub Actions workflows
-- `codebuild_project_names`: Map of project names keyed by runner index
-- `codebuild_project_arns`: Map of project ARNs keyed by runner index
-- `codebuild_project_names_by_arch_size`: Map of project names keyed by architecture and size label
-- `fleet_arns`: Map of fleet ARNs keyed by runner index and architecture (only for FLEET compute_type)
-- `fleet_ids`: Map of fleet IDs keyed by runner index and architecture (only for FLEET compute_type)
-- `fleet_names`: Map of fleet names keyed by runner index and architecture (only for FLEET compute_type)
+| Name | Description |
+|------|-------------|
+| <a name="output_codebuild_project_arns"></a> [codebuild\_project\_arns](#output\_codebuild\_project\_arns) | Map of CodeBuild project ARNs keyed by runner index |
+| <a name="output_codebuild_project_names"></a> [codebuild\_project\_names](#output\_codebuild\_project\_names) | Map of CodeBuild project names keyed by runner index |
+| <a name="output_codebuild_project_names_by_arch_size"></a> [codebuild\_project\_names\_by\_arch\_size](#output\_codebuild\_project\_names\_by\_arch\_size) | Map of CodeBuild project names keyed by architecture and size label |
+| <a name="output_fleet_arns"></a> [fleet\_arns](#output\_fleet\_arns) | Map of fleet ARNs keyed by runner index and architecture (only for FLEET compute\_type) |
+| <a name="output_fleet_ids"></a> [fleet\_ids](#output\_fleet\_ids) | Map of fleet IDs keyed by runner index and architecture (only for FLEET compute\_type) |
+| <a name="output_fleet_names"></a> [fleet\_names](#output\_fleet\_names) | Map of fleet names keyed by runner index and architecture (only for FLEET compute\_type) |
+| <a name="output_workflow_runner_labels"></a> [workflow\_runner\_labels](#output\_workflow\_runner\_labels) | Available runner labels for use in GitHub Actions workflows |
+<!-- END_TF_DOCS -->

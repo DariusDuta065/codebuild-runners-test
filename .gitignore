@@ -1,6 +1,10 @@
 # Ignored files
 infra/ec2-private-subnet-nat-instance-test/
 docs/
+!infra/
+!infra/codebuild-github-actions-runners/
+!infra/codebuild-github-actions-runners/docs/
+!infra/codebuild-github-actions-runners/docs/module-description.md
 
 # Local .terraform directories
 **/.terraform/*
