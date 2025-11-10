@@ -12,10 +12,10 @@ output "codebuild_project_arns" {
   }
 }
 
-output "codebuild_project_names_by_arch_size" {
-  description = "Map of CodeBuild project names keyed by architecture and size label"
+output "runner_names" {
+  description = "Map of runner names to CodeBuild project names"
   value = {
-    for idx, runner in var.runners : "${runner.architecture}-${runner.size_label}" => aws_codebuild_project.github_runner[idx].name
+    for idx, runner in var.runners : runner.name => aws_codebuild_project.github_runner[idx].name
   }
 }
 

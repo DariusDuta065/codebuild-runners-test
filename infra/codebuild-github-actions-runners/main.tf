@@ -61,7 +61,7 @@ resource "aws_codebuild_project" "github_runner" {
   }
 
   name          = each.value.name
-  description   = "Self-hosted GitHub Actions runner using AWS CodeBuild (${each.value.architecture}, ${each.value.size_label}, ${each.value.compute_type})"
+  description   = "Self-hosted GitHub Actions runner using AWS CodeBuild (${each.value.architecture}, ${each.value.compute_type})"
   build_timeout = var.build_timeout
   service_role  = aws_iam_role.codebuild_service_role.arn
 

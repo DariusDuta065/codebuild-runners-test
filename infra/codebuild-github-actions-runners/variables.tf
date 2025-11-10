@@ -52,8 +52,7 @@ variable "runners" {
     name                   = string
     compute_type           = string # "FLEET" or "ON_DEMAND"
     architecture           = string
-    image                  = string # See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
-    size_label             = optional(string, "small")
+    image                  = string           # See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
     minimum_capacity       = optional(number) # Required only for compute_type = "FLEET"
     on_demand_compute_type = optional(string) # Required only for compute_type = "ON_DEMAND". See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html
 
@@ -80,7 +79,6 @@ variable "runners" {
       architecture     = "x86_64"
       minimum_capacity = 1
       image            = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
-      size_label       = "small"
       compute_configuration = {
         vcpu_count = 2
         memory     = 4

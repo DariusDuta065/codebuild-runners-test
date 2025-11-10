@@ -5,6 +5,7 @@ docs/
 !infra/codebuild-github-actions-runners/
 !infra/codebuild-github-actions-runners/docs/
 !infra/codebuild-github-actions-runners/docs/module-description.md
+!AGENTS.md
 
 # Local .terraform directories
 **/.terraform/*
