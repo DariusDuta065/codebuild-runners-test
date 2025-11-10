@@ -93,8 +93,10 @@ resource "aws_codebuild_project" "github_runner" {
   }
 
   source {
-    type     = "GITHUB"
-    location = var.codebuild_location
+    type = "GITHUB"
+    # For org-level webhooks, use CODEBUILD_DEFAULT_WEBHOOK_SOURCE_LOCATION
+    # For repo-level webhooks, use the repository URL from github_config.location
+    location = var.github_config.webhook_scope == "GITHUB_ORGANIZATION" ? "CODEBUILD_DEFAULT_WEBHOOK_SOURCE_LOCATION" : var.github_config.location
 
     git_clone_depth = 1
     git_submodules_config {
@@ -144,6 +146,15 @@ resource "aws_codebuild_webhook" "github_runner" {
     filter {
       type    = "EVENT"
       pattern = "WORKFLOW_JOB_QUEUED"
+    }
+  }
+
+  # Scope configuration for organization-level webhooks
+  dynamic "scope_configuration" {
+    for_each = var.github_config.webhook_scope == "GITHUB_ORGANIZATION" ? [1] : []
+    content {
+      scope = "GITHUB_ORGANIZATION"
+      name  = var.github_config.github_organization_name
     }
   }
 }

@@ -101,8 +101,8 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 | Name | Description | Default | Required |
 |------|-------------|---------|:--------:|
 | <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `60` | no |
-| <a name="input_codebuild_location"></a> [codebuild\_location](#input\_codebuild\_location) | Target for CodeBuild: provide either the GitHub repository URL (https://github.com/owner/repo) or the GitHub organization name. | n/a | yes |
 | <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | n/a | yes |
+| <a name="input_github_config"></a> [github\_config](#input\_github\_config) | GitHub and webhook configuration. Controls both the CodeBuild source location and webhook scope. | n/a | yes |
 | <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small"<br/>  }<br/>]</pre> | no |
 
 ## Outputs

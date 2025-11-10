@@ -1,10 +1,20 @@
 # Copy this file to terraform.tfvars and customize the values
 
-# CodeBuild location: GitHub repository URL or organization name (REQUIRED)
-# Provide either:
-# - A GitHub repository URL: https://github.com/owner/repo
-# - A GitHub organization name: owner
-codebuild_location = "https://github.com/your-github-username-or-org/your-repo"
+# GitHub and webhook configuration
+# Controls both the CodeBuild source location and webhook scope
+#
+# For repository-level webhooks (single repository):
+github_config = {
+  webhook_scope = "REPOSITORY"
+  location      = "https://github.com/your-github-username-or-org/your-repo"
+}
+
+# For organization-level webhooks (all repos in an organization):
+# github_config = {
+#   webhook_scope           = "GITHUB_ORGANIZATION"
+#   github_organization_name = "your-organization-name"
+#   # location is automatically set to CODEBUILD_DEFAULT_WEBHOOK_SOURCE_LOCATION
+# }
 
 # CodeConnections connection ARN for GitHub (using GitHub App)
 # When provided, CodeConnections will be used instead of webhooks and PAT authentication.

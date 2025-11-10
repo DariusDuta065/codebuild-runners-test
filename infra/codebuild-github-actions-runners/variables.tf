@@ -1,9 +1,24 @@
-variable "codebuild_location" {
-  description = "Target for CodeBuild: provide either the GitHub repository URL (https://github.com/owner/repo) or the GitHub organization name."
-  type        = string
+variable "github_config" {
+  description = "GitHub and webhook configuration. Controls both the CodeBuild source location and webhook scope."
+  type = object({
+    webhook_scope            = string           # "REPOSITORY" or "GITHUB_ORGANIZATION"
+    location                 = optional(string) # GitHub repository URL (required when webhook_scope is REPOSITORY)
+    github_organization_name = optional(string) # GitHub organization name (required when webhook_scope is GITHUB_ORGANIZATION)
+  })
+
   validation {
-    condition     = length(var.codebuild_location) > 0
-    error_message = "codebuild_location is required and cannot be empty."
+    condition     = contains(["REPOSITORY", "GITHUB_ORGANIZATION"], var.github_config.webhook_scope)
+    error_message = "webhook_scope must be either 'REPOSITORY' or 'GITHUB_ORGANIZATION'."
+  }
+
+  validation {
+    condition     = var.github_config.webhook_scope != "REPOSITORY" || (var.github_config.location != null && length(var.github_config.location) > 0)
+    error_message = "location is required when webhook_scope is 'REPOSITORY'."
+  }
+
+  validation {
+    condition     = var.github_config.webhook_scope != "GITHUB_ORGANIZATION" || (var.github_config.github_organization_name != null && length(var.github_config.github_organization_name) > 0)
+    error_message = "github_organization_name is required when webhook_scope is 'GITHUB_ORGANIZATION'."
   }
 }
 
