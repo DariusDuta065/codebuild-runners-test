@@ -3,6 +3,7 @@ formatter: markdown table
 settings:
   hide-empty: true
   lockfile: false
+  type: false
 output:
   file: README.md
   mode: inject

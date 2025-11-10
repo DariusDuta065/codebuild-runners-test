@@ -97,14 +97,14 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be created | `string` | `"eu-west-1"` | no |
-| <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `number` | `60` | no |
-| <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | `string` | n/a | yes |
-| <a name="input_github_repository_url"></a> [github\_repository\_url](#input\_github\_repository\_url) | GitHub repository URL for CodeBuild source. Use format: https://github.com/username/repo | `string` | `""` | no |
-| <a name="input_github_username"></a> [github\_username](#input\_github\_username) | Your GitHub username or organization name | `string` | n/a | yes |
-| <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>list(object({<br/>    name                   = string<br/>    compute_type           = string # "FLEET" or "ON_DEMAND"<br/>    architecture           = string<br/>    image                  = string           # See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html<br/>    minimum_capacity       = optional(number) # Required only for compute_type = "FLEET"<br/>    on_demand_compute_type = optional(string) # Required only for compute_type = "ON_DEMAND". See: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html<br/><br/>    vpc_config = optional(object({<br/>      vpc_id     = string<br/>      subnet_ids = list(string)<br/>    }), null)<br/><br/>    compute_configuration = optional(object({<br/>      vcpu_count = optional(number, 2)<br/>      memory     = optional(number, 4)<br/>      disk_space = optional(number, 64)<br/>      }), {<br/>      vcpu_count = 2<br/>      memory     = 4<br/>      disk_space = 64<br/>    })<br/>  }))</pre> | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small"<br/>  }<br/>]</pre> | no |
+| Name | Description | Default | Required |
+|------|-------------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region where resources will be created | `"eu-west-1"` | no |
+| <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `60` | no |
+| <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | n/a | yes |
+| <a name="input_github_repository_url"></a> [github\_repository\_url](#input\_github\_repository\_url) | GitHub repository URL for CodeBuild source. Use format: https://github.com/username/repo | `""` | no |
+| <a name="input_github_username"></a> [github\_username](#input\_github\_username) | Your GitHub username or organization name | n/a | yes |
+| <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small"<br/>  }<br/>]</pre> | no |
 
 ## Outputs
 
