@@ -13,37 +13,91 @@ permissions:
 jobs:
   test:
     runs-on:
-      - codebuild-github-runner-${{ github.run_id }}-${{ github.run_attempt }}
-        fleet:${{ matrix.fleet }}
+      - codebuild-${{ matrix.runner_label }}-${{ github.run_id }}-${{ github.run_attempt }}
     environment: aws
     strategy:
       matrix:
-        fleet: [github-runner-fleet-x86_64, github-runner-fleet-arm64]
+        include:
+          - runner_label: gha-x86-small
+            container-tag: x86_64
+          - runner_label: gha-arm64-small
+            container-tag: arm64
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Check STS credentials
+        continue-on-error: true
+        run: |
+          aws sts get-caller-identity
+
       - name: Configure AWS credentials
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.OIDC_IAM_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Check STS credentials
+        continue-on-error: true
+        run: |
+          aws sts get-caller-identity
+
       - name: Login to Private ECR
+        continue-on-error: true
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Configure AWS credentials for Public ECR
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.OIDC_IAM_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Login to Public ECR
+        continue-on-error: true
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registry-type: public
 
+      - name: Validate Docker ECR logins
+        continue-on-error: true
+        run: |
+          echo "Checking Docker config for ECR logins..."
+          if [ -f ~/.docker/config.json ]; then
+            echo "Docker config file contents:"
+            cat ~/.docker/config.json | jq '.auths // {}' || cat ~/.docker/config.json
+            echo ""
+            echo "Checking for Public ECR (public.ecr.aws)..."
+            grep -q "public.ecr.aws" ~/.docker/config.json && echo "✓ Public ECR found" || echo "✗ Public ECR not found"
+            echo "Checking for Private ECR..."
+            grep -q "dkr.ecr.*amazonaws.com" ~/.docker/config.json && echo "✓ Private ECR found" || echo "✗ Private ECR not found"
+          else
+            echo "Docker config file not found at ~/.docker/config.json"
+          fi
+
+      - name: Print all environment variables
+        continue-on-error: true
+        run: |
+          echo "=== All Environment Variables ==="
+          env | sort
+
       - name: Pull nginx ECR public image
+        continue-on-error: true
         run: |
           docker pull public.ecr.aws/nginx/nginx:latest
 
       - name: Pull private ECR image
         run: |
           docker pull ${{ vars.ECR_REPO_URL }}/200mb-image:latest
+
+      - name: Build Docker image
+        continue-on-error: true
+        run: |
+          docker build -t 200mb-image -f docker/Dockerfile .
+
+      - name: Push Docker image to private ECR
+        continue-on-error: true
+        run: |
+          docker tag 200mb-image ${{ vars.ECR_REPO_URL }}/200mb-image:${{ matrix.container-tag }}
+          docker push ${{ vars.ECR_REPO_URL }}/200mb-image:${{ matrix.container-tag }}
