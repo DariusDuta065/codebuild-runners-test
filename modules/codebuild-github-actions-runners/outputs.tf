@@ -48,3 +48,8 @@ output "workflow_runner_labels" {
   value       = [for idx, runner in var.runners : "codebuild-${aws_codebuild_project.github_runner[idx].name}-$${{ github.run_id }}-$${{ github.run_attempt }}"]
 }
 
+output "s3_logging_bucket" {
+  description = "S3 bucket name for CodeBuild logs (only available when enable_s3_logging is true)"
+  value       = var.enable_s3_logging ? aws_s3_bucket.codebuild_logs[0].bucket : null
+}
+

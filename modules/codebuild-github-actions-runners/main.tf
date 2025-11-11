@@ -127,6 +127,14 @@ resource "aws_codebuild_project" "github_runner" {
       group_name  = "/aws/codebuild/${each.value.name}"
       stream_name = "build-log"
     }
+
+    dynamic "s3_logs" {
+      for_each = var.enable_s3_logging ? [1] : []
+      content {
+        status   = "ENABLED"
+        location = "${aws_s3_bucket.codebuild_logs[0].bucket}/codebuild-logs/${each.value.name}"
+      }
+    }
   }
 }
 

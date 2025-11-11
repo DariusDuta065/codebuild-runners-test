@@ -138,3 +138,18 @@ variable "runners" {
   }
 }
 
+variable "enable_s3_logging" {
+  description = "Enable S3 bucket logging for CodeBuild projects"
+  type        = bool
+  default     = false
+}
+
+variable "s3_logging_bucket_name" {
+  description = "Name of the S3 logging bucket. Required when enable_s3_logging is true."
+  type        = string
+
+  validation {
+    condition     = var.enable_s3_logging == false || (length(var.s3_logging_bucket_name) > 0)
+    error_message = "s3_logging_bucket_name must be set when enable_s3_logging is true."
+  }
+}

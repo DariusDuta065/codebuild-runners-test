@@ -137,3 +137,14 @@ variable "runners" {
     error_message = "on_demand_compute_type is required for ON_DEMAND compute_type and must be one of: BUILD_GENERAL1_SMALL, BUILD_GENERAL1_MEDIUM, BUILD_GENERAL1_LARGE, BUILD_GENERAL1_XLARGE, BUILD_GENERAL1_2XLARGE, BUILD_LAMBDA_1GB, BUILD_LAMBDA_2GB, BUILD_LAMBDA_4GB, BUILD_LAMBDA_8GB, BUILD_LAMBDA_10GB, CUSTOM_INSTANCE_TYPE"
   }
 }
+
+variable "enable_s3_logging" {
+  description = "Enable S3 bucket logging for CodeBuild projects"
+  type        = bool
+  default     = false
+}
+
+variable "s3_logging_bucket_name" {
+  description = "Name of the S3 logging bucket. Required when enable_s3_logging is true."
+  type        = string
+}

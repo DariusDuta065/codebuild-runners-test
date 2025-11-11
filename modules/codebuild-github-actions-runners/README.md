@@ -91,6 +91,11 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 | [aws_iam_role.codebuild_service_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.codebuild_fleet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_s3_bucket.codebuild_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_lifecycle_configuration.codebuild_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
+| [aws_s3_bucket_policy.codebuild_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
+| [aws_s3_bucket_public_access_block.codebuild_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_server_side_encryption_configuration.codebuild_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_security_group.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_iam_policy_document.codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.codebuild_service_role_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -102,8 +107,10 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 |------|-------------|---------|:--------:|
 | <a name="input_build_timeout"></a> [build\_timeout](#input\_build\_timeout) | Build timeout in minutes | `60` | no |
 | <a name="input_codeconnections_connection_arn"></a> [codeconnections\_connection\_arn](#input\_codeconnections\_connection\_arn) | ARN of the AWS CodeConnections connection for GitHub. | n/a | yes |
+| <a name="input_enable_s3_logging"></a> [enable\_s3\_logging](#input\_enable\_s3\_logging) | Enable S3 bucket logging for CodeBuild projects | `false` | no |
 | <a name="input_github_config"></a> [github\_config](#input\_github\_config) | GitHub and webhook configuration. Controls both the CodeBuild source location and webhook scope. | n/a | yes |
 | <a name="input_runners"></a> [runners](#input\_runners) | List of CodeBuild runners (mapping to CodeBuild build projects). Supports both Compute Fleets (with reserved capacity) and On-Demand projects. Defaults to one fleet runner: Linux x86\_64. | <pre>[<br/>  {<br/>    "architecture": "x86_64",<br/>    "compute_configuration": {<br/>      "disk_space": 64,<br/>      "memory": 4,<br/>      "vcpu_count": 2<br/>    },<br/>    "compute_type": "FLEET",<br/>    "image": "aws/codebuild/amazonlinux-x86_64-standard:5.0",<br/>    "minimum_capacity": 1,<br/>    "name": "github-runner-x86_64-small"<br/>  }<br/>]</pre> | no |
+| <a name="input_s3_logging_bucket_name"></a> [s3\_logging\_bucket\_name](#input\_s3\_logging\_bucket\_name) | Name of the S3 logging bucket. Required when enable\_s3\_logging is true. | n/a | yes |
 
 ## Outputs
 
@@ -115,5 +122,6 @@ This module creates CodeBuild projects for running GitHub Actions workflows. Eac
 | <a name="output_fleet_ids"></a> [fleet\_ids](#output\_fleet\_ids) | Map of fleet IDs keyed by runner index and architecture (only for FLEET compute\_type) |
 | <a name="output_fleet_names"></a> [fleet\_names](#output\_fleet\_names) | Map of fleet names keyed by runner index and architecture (only for FLEET compute\_type) |
 | <a name="output_runner_names"></a> [runner\_names](#output\_runner\_names) | Map of runner names to CodeBuild project names |
+| <a name="output_s3_logging_bucket"></a> [s3\_logging\_bucket](#output\_s3\_logging\_bucket) | S3 bucket name for CodeBuild logs (only available when enable\_s3\_logging is true) |
 | <a name="output_workflow_runner_labels"></a> [workflow\_runner\_labels](#output\_workflow\_runner\_labels) | Available runner labels for use in GitHub Actions workflows |
 <!-- END_TF_DOCS -->

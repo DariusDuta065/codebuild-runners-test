@@ -5,4 +5,6 @@ module "codebuild-github-actions-runners" {
   build_timeout                  = var.build_timeout
   codeconnections_connection_arn = var.codeconnections_connection_arn
   runners                        = var.runners
+  enable_s3_logging              = var.enable_s3_logging
+  s3_logging_bucket_name         = var.s3_logging_bucket_name
 }

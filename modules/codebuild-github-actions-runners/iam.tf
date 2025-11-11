@@ -115,6 +115,24 @@ data "aws_iam_policy_document" "codebuild" {
       resources = ["arn:aws:codebuild:${data.aws_region.current.name}:*:project/*"]
     }
   }
+
+  # S3 logging permissions (conditional)
+  # Required for CodeBuild to write logs to S3 bucket
+  dynamic "statement" {
+    for_each = var.enable_s3_logging ? [1] : []
+    content {
+      sid    = "AllowS3LoggingOperations"
+      effect = "Allow"
+      actions = [
+        "s3:PutObject",
+        "s3:GetBucketLocation"
+      ]
+      resources = [
+        aws_s3_bucket.codebuild_logs[0].arn,
+        "${aws_s3_bucket.codebuild_logs[0].arn}/*"
+      ]
+    }
+  }
 }
 
 # IAM Policy for CodeBuild
